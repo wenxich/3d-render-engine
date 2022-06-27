@@ -7,19 +7,22 @@ public class Viewer {
         Container pane = frame.getContentPane();
         pane.setLayout(new BorderLayout());
 
+        //create slider for horizontal rotation
         JSlider horizontalRotation = new JSlider(0,360,180); //0 = min, 360 = max, value = 180
         horizontalRotation.setOpaque(true);
         horizontalRotation.setBackground(Color.BLACK);
         horizontalRotation.setSize(495,5);
         pane.add(horizontalRotation, BorderLayout.SOUTH);
 
+        //create slider for vertical rotation
         JSlider verticalRotation = new JSlider(SwingConstants.VERTICAL, -90, 90, 0); //orientation = vertical constants, min = -90, max = 90, value = 0
         verticalRotation.setOpaque(true);
         verticalRotation.setBackground(Color.BLACK);
         verticalRotation.setSize(5,495);
         pane.add(verticalRotation, BorderLayout.EAST);
 
-        JPanel render = new JPanel() { //render panel
+        //create render panel
+        JPanel render = new JPanel() {
             public void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g; //making a Graphics2D object from g to render 2D background
                 g2.setColor(Color.BLACK);
