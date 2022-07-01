@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Viewer {
     public static void main(String[] args) {
@@ -27,6 +29,14 @@ public class Viewer {
                 Graphics2D g2 = (Graphics2D) g; //making a Graphics2D object from g to render 2D background
                 g2.setColor(Color.BLACK);
                 g2.fillRect(0, 0, getWidth(), getHeight());
+
+                //create a tetrahedron to render
+                List<Triangle> tetrahedron = new ArrayList<>();
+                tetrahedron.add(new Triangle(new Vertex(100, 100, 100),
+                        new Vertex (-100, -100, 100),
+                        new Vertex(-100, 100, -100),
+                        Color.WHITE));
+
             }
         };
         pane.add(render, BorderLayout.CENTER);
