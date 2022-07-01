@@ -1,7 +1,7 @@
 # 3D Render Engine (Java)
 A 3D render engine created using Java Swing.
 
-I decided to take on this challenge to hopefully learn more about Java Swing (and Java in general) since <a href="https://github.com/wenxich/snake">my Snake project</a>.
+I took on this challenge to learn more about Java Swing (and Java in general) since <a href="https://github.com/wenxich/snake">my Snake project</a>.
 
 This 3D render engine is still a work-in-progress. Currently, users are able to play around with a simple transparent (except for the edges) tetrahedron.
 
