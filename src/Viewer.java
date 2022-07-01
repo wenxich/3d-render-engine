@@ -52,17 +52,28 @@ public class Viewer {
                         new Color(85,93,80)));
 
                 double horizontalSliderPosition = Math.toRadians(horizontalRotation.getValue());
-                MatrixCalc transMatrix = new MatrixCalc(new double[] { //making a transformation matrix based on horizontal slider mouse position
-                        Math.cos(horizontalSliderPosition), 0, -Math.sin(horizontalSliderPosition),
-                        0, 1, 0,
-                        Math.sin(horizontalSliderPosition), 0, Math.cos(horizontalSliderPosition)
+                MatrixCalc horizontalTransMatrix = new MatrixCalc(new double[] {
+                        //making a transformation matrix based on horizontal slider mouse position
+                        Math.cos(horizontalSliderPosition), 0, -Math.sin(horizontalSliderPosition), //first row
+                        0, 1, 0, //second row
+                        Math.sin(horizontalSliderPosition), 0, Math.cos(horizontalSliderPosition) //third row
                 });
+
+                double verticalSliderPosition = Math.toRadians(verticalRotation.getValue());
+                MatrixCalc verticalTransMatrix = new MatrixCalc( new double[] {
+                        //making a transformation matrix based on vertical slider mouse position
+                        1, 0, 0, //first row
+                        0, Math.cos(verticalSliderPosition), Math.sin(verticalSliderPosition), //second row
+                        0, -Math.sin(verticalSliderPosition), Math.cos(verticalSliderPosition) //third row
+                });
+
+                MatrixCalc transMatrix = horizontalTransMatrix.multiply(verticalTransMatrix); //make both rotations work together
 
                 g2.translate((getWidth()/2), (getHeight()/2));
                 g2.setColor(Color.WHITE);
 
                 for (Triangle t : tetrahedron) {
-                    Vertex v1 = transMatrix.transform(t.v1); //making vertices change according to horizontal slider mouse position
+                    Vertex v1 = transMatrix.transform(t.v1); //making vertices change according to transformation matrix
                     Vertex v2 = transMatrix.transform(t.v2);
                     Vertex v3 = transMatrix.transform(t.v3);
 
@@ -76,13 +87,13 @@ public class Viewer {
                 }
             }
         };
-        pane.add(render, BorderLayout.CENTER);
+        pane.add(render, BorderLayout.CENTER); //make render in center of frame
 
-        horizontalRotation.addChangeListener(e -> render.repaint());
+        horizontalRotation.addChangeListener(e -> render.repaint()); //make sure program knows where your mouse position is on sliders
         verticalRotation.addChangeListener(e -> render.repaint());
 
         frame.setSize(800,800); //width and height = both 500 px
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        frame.setLocationRelativeTo(null); //make frame centered
+        frame.setVisible(true); //make frame visible
     }
 }
