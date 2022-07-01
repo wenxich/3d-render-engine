@@ -78,6 +78,9 @@ public class Viewer {
         };
         pane.add(render, BorderLayout.CENTER);
 
+        horizontalRotation.addChangeListener(e -> render.repaint());
+        verticalRotation.addChangeListener(e -> render.repaint());
+
         frame.setSize(800,800); //width and height = both 500 px
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
