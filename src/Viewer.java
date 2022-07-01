@@ -51,15 +51,26 @@ public class Viewer {
                         new Vertex(200, 200, 200),
                         new Color(85,93,80)));
 
+                double horizontalSliderPosition = Math.toRadians(horizontalRotation.getValue());
+                MatrixCalc transMatrix = new MatrixCalc(new double[] { //making a transformation matrix based on horizontal slider mouse position
+                        Math.cos(horizontalSliderPosition), 0, -Math.sin(horizontalSliderPosition),
+                        0, 1, 0,
+                        Math.sin(horizontalSliderPosition), 0, Math.cos(horizontalSliderPosition)
+                });
+
                 g2.translate((getWidth()/2), (getHeight()/2));
                 g2.setColor(Color.WHITE);
 
                 for (Triangle t : tetrahedron) {
+                    Vertex v1 = transMatrix.transform(t.v1); //making vertices change according to horizontal slider mouse position
+                    Vertex v2 = transMatrix.transform(t.v2);
+                    Vertex v3 = transMatrix.transform(t.v3);
+
                     //draw lines to make the list of triangles a tetrahedron
                     Path2D connect = new Path2D.Double();
-                    connect.moveTo(t.v1.x, t.v1.y); //start at first triangle
-                    connect.lineTo(t.v2.x, t.v2.y);
-                    connect.lineTo(t.v3.x, t.v3.y);
+                    connect.moveTo(v1.x, v1.y); //start at first triangle
+                    connect.lineTo(v2.x, v2.y);
+                    connect.lineTo(v3.x, v3.y);
                     connect.closePath();
                     g2.draw(connect);
                 }
