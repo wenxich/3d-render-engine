@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,22 +35,22 @@ public class Viewer {
                 tetrahedron.add(new Triangle(new Vertex(200, 200, 200),
                         new Vertex (-200, -200, 200),
                         new Vertex(-200, 200, -200),
-                        new Color(53,94,59)));
+                        Color.WHITE));
 
                 tetrahedron.add(new Triangle(new Vertex(200, 200, 200),
                         new Vertex (-200, -200, 200),
                         new Vertex(200, -200, -200),
-                        new Color(79,121,66)));
+                        Color.YELLOW));
 
                 tetrahedron.add(new Triangle(new Vertex(-200, 200, -200),
                         new Vertex (200, -200, -200),
                         new Vertex(-200, -200, 200),
-                        new Color(74,93,25)));
+                        Color.RED));
 
                 tetrahedron.add(new Triangle(new Vertex(-200, 200, -200),
                         new Vertex (200, -200, -200),
                         new Vertex(200, 200, 200),
-                        new Color(85,93,80)));
+                        Color.BLUE));
 
                 double horizontalSliderPosition = Math.toRadians(horizontalRotation.getValue());
                 MatrixCalc horizontalTransMatrix = new MatrixCalc(new double[] {
@@ -69,22 +70,55 @@ public class Viewer {
 
                 MatrixCalc transMatrix = horizontalTransMatrix.multiply(verticalTransMatrix); //make both rotations work together
 
-                g2.translate((getWidth()/2), (getHeight()/2));
-                g2.setColor(Color.WHITE);
+                BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB); //rasterize the triangle
+
+                double[] zBuffer = new double[img.getWidth() * img.getHeight()];
 
                 for (Triangle t : tetrahedron) {
                     Vertex v1 = transMatrix.transform(t.v1); //making vertices change according to transformation matrix
                     Vertex v2 = transMatrix.transform(t.v2);
                     Vertex v3 = transMatrix.transform(t.v3);
 
-                    //draw lines to make the list of triangles a tetrahedron
-                    Path2D connect = new Path2D.Double();
-                    connect.moveTo(v1.x, v1.y); //start at first triangle
-                    connect.lineTo(v2.x, v2.y);
-                    connect.lineTo(v3.x, v3.y);
-                    connect.closePath();
-                    g2.draw(connect);
+
+                    //manual translation of triangle
+
+                    v1.x += getWidth() / 2;
+                    v1.y += getHeight() / 2;
+
+                    v2.x += getWidth() / 2;
+                    v2.y += getHeight() / 2;
+
+                    v3.x += getWidth() / 2;
+                    v3.y += getHeight() / 2;
+
+                    // calculate rectangular bounds for triangle
+                    int minX = (int) Math.max(0, Math.ceil(Math.min(v1.x, Math.min(v2.x, v3.x))));
+                    int maxX = (int) Math.min(img.getWidth() - 1,
+                            Math.floor(Math.max(v1.x, Math.max(v2.x, v3.x))));
+                    int minY = (int) Math.max(0, Math.ceil(Math.min(v1.y, Math.min(v2.y, v3.y))));
+                    int maxY = (int) Math.min(img.getHeight() - 1,
+                            Math.floor(Math.max(v1.y, Math.max(v2.y, v3.y))));
+
+                    double triangleArea =
+                            (v1.y - v3.y) * (v2.x - v3.x) + (v2.y - v3.y) * (v3.x - v1.x);
+
+                    for (int y = minY; y <= maxY; y++) {
+                        for (int x = minX; x <= maxX; x++) {
+                            double b1 =
+                                    ((y - v3.y) * (v2.x - v3.x) + (v2.y - v3.y) * (v3.x - x)) / triangleArea;
+                            double b2 =
+                                    ((y - v1.y) * (v3.x - v1.x) + (v3.y - v1.y) * (v1.x - x)) / triangleArea;
+                            double b3 =
+                                    ((y - v2.y) * (v1.x - v2.x) + (v1.y - v2.y) * (v2.x - x)) / triangleArea;
+                            if (b1 >= 0 && b1 <= 1 && b2 >= 0 && b2 <= 1 && b3 >= 0 && b3 <= 1) {
+                                img.setRGB(x, y, t.color.getRGB());
+                            }
+                        }
+                    }
+
                 }
+
+                g2.drawImage(img, 0, 0, null);
             }
         };
         pane.add(render, BorderLayout.CENTER); //make render in center of frame
