@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Viewer {
@@ -74,6 +75,8 @@ public class Viewer {
 
                 double[] zBuffer = new double[img.getWidth() * img.getHeight()];
 
+                Arrays.fill(zBuffer, Double.NEGATIVE_INFINITY); //initialize array w/ far-away z-values
+
                 for (Triangle t : tetrahedron) {
                     Vertex v1 = transMatrix.transform(t.v1); //making vertices change according to transformation matrix
                     Vertex v2 = transMatrix.transform(t.v2);
@@ -82,14 +85,14 @@ public class Viewer {
 
                     //manual translation of triangle
 
-                    v1.x += getWidth() / 2;
-                    v1.y += getHeight() / 2;
+                    v1.x += getWidth() / 2.0;
+                    v1.y += getHeight() / 2.0;
 
-                    v2.x += getWidth() / 2;
-                    v2.y += getHeight() / 2;
+                    v2.x += getWidth() / 2.0;
+                    v2.y += getHeight() / 2.0;
 
-                    v3.x += getWidth() / 2;
-                    v3.y += getHeight() / 2;
+                    v3.x += getWidth() / 2.0;
+                    v3.y += getHeight() / 2.0;
 
                     // calculate rectangular bounds for triangle
                     int minX = (int) Math.max(0, Math.ceil(Math.min(v1.x, Math.min(v2.x, v3.x))));
@@ -111,7 +114,13 @@ public class Viewer {
                             double b3 =
                                     ((y - v2.y) * (v1.x - v2.x) + (v1.y - v2.y) * (v2.x - x)) / triangleArea;
                             if (b1 >= 0 && b1 <= 1 && b2 >= 0 && b2 <= 1 && b3 >= 0 && b3 <= 1) {
-                                img.setRGB(x, y, t.color.getRGB());
+                                //set z-value for each rasterized pixel
+                                double depth = (b1 * v1.z) + (b2 * v2.z) + (b3 * v3.z);
+                                int zIndex = y * img.getWidth() + x;
+                                if (zBuffer[zIndex] < depth) {
+                                    img.setRGB(x, y, t.color.getRGB());
+                                    zBuffer[zIndex] = depth;
+                                }
                             }
                         }
                     }
