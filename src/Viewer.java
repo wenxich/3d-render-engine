@@ -23,6 +23,39 @@ public class Viewer {
         verticalRotation.setBackground(Color.BLACK);
         pane.add(verticalRotation, BorderLayout.EAST);
 
+
+        //create sliders for color adjustment
+        JSlider redSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+        JSlider greenSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+        JSlider blueSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+
+        JLabel redLabel = new JLabel("RED");
+        JLabel greenLabel = new JLabel("GREEN");
+        JLabel blueLabel = new JLabel("BLUE");
+
+        //make the text visible against a black bg
+        redLabel.setForeground(Color.WHITE);
+        greenLabel.setForeground(Color.WHITE);
+        blueLabel.setForeground(Color.WHITE);
+
+        //make the text centered
+        redLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        greenLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        blueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel colorPanel = new JPanel();
+        colorPanel.setLayout(new GridLayout(2,3,1,1));
+        colorPanel.setBackground(Color.BLACK);
+
+        colorPanel.add(redSlider); //row 1 col 1
+        colorPanel.add(greenSlider); //row 1 col 2
+        colorPanel.add(blueSlider); //row 1 col 3
+        colorPanel.add(redLabel); //row 2 col 1
+        colorPanel.add(greenLabel); //row 2 col 2
+        colorPanel.add(blueLabel); //row 2 col 3
+
+        pane.add(colorPanel, BorderLayout.NORTH);
+
         //create render panel
         JPanel render = new JPanel() {
             public void paintComponent(Graphics g) {
@@ -30,27 +63,33 @@ public class Viewer {
                 g2.setColor(Color.BLACK);
                 g2.fillRect(0, 0, getWidth(), getHeight());
 
+                int redPosition = redSlider.getValue();
+                int greenPosition = greenSlider.getValue();
+                int bluePosition = blueSlider.getValue();
+
+                Color tetrahedronColor = new Color(redPosition, greenPosition, bluePosition);
+
                 //start making a tetrahedron using 4 triangles
                 List<Triangle> tetrahedron = new ArrayList<>();
                 tetrahedron.add(new Triangle(new Vertex(200, 200, 200),
                         new Vertex (-200, -200, 200),
                         new Vertex(-200, 200, -200),
-                        Color.WHITE));
+                        tetrahedronColor));
 
                 tetrahedron.add(new Triangle(new Vertex(200, 200, 200),
                         new Vertex (-200, -200, 200),
                         new Vertex(200, -200, -200),
-                        Color.YELLOW));
+                        tetrahedronColor));
 
                 tetrahedron.add(new Triangle(new Vertex(-200, 200, -200),
                         new Vertex (200, -200, -200),
                         new Vertex(-200, -200, 200),
-                        Color.RED));
+                        tetrahedronColor));
 
                 tetrahedron.add(new Triangle(new Vertex(-200, 200, -200),
                         new Vertex (200, -200, -200),
                         new Vertex(200, 200, 200),
-                        Color.BLUE));
+                        tetrahedronColor));
 
                 double horizontalSliderPosition = Math.toRadians(horizontalRotation.getValue());
                 MatrixCalc horizontalTransMatrix = new MatrixCalc(new double[] {
@@ -143,6 +182,9 @@ public class Viewer {
 
         horizontalRotation.addChangeListener(e -> render.repaint()); //make sure program knows where your mouse position is on sliders
         verticalRotation.addChangeListener(e -> render.repaint());
+        redSlider.addChangeListener(e -> render.repaint());
+        greenSlider.addChangeListener(e -> render.repaint());
+        blueSlider.addChangeListener(e -> render.repaint());
 
         frame.setSize(800,800); //width and height = both 500 px
         frame.setLocationRelativeTo(null); //make frame centered
