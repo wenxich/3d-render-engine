@@ -29,9 +29,9 @@ public class Viewer {
         JSlider greenSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
         JSlider blueSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
 
-        JLabel redLabel = new JLabel("RED");
-        JLabel greenLabel = new JLabel("GREEN");
-        JLabel blueLabel = new JLabel("BLUE");
+        JLabel redLabel = new JLabel("RED = 0");
+        JLabel greenLabel = new JLabel("GREEN = 0");
+        JLabel blueLabel = new JLabel("BLUE = 0");
 
         //make the text visible against a black bg
         redLabel.setForeground(Color.WHITE);
@@ -66,6 +66,10 @@ public class Viewer {
                 int redPosition = redSlider.getValue();
                 int greenPosition = greenSlider.getValue();
                 int bluePosition = blueSlider.getValue();
+
+                redLabel.setText("RED = " + redPosition);
+                greenLabel.setText("GREEN = " + greenPosition);
+                blueLabel.setText("BLUE = " + bluePosition);
 
                 Color tetrahedronColor = new Color(redPosition, greenPosition, bluePosition);
 
