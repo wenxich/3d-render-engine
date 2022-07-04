@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,20 +78,30 @@ public class Viewer {
 
                 for (Triangle t : tetrahedron) {
                     Vertex v1 = transMatrix.transform(t.v1); //making vertices change according to transformation matrix
-                    Vertex v2 = transMatrix.transform(t.v2);
-                    Vertex v3 = transMatrix.transform(t.v3);
-
-
-                    //manual translation of triangle
-
                     v1.x += getWidth() / 2.0;
                     v1.y += getHeight() / 2.0;
 
+                    Vertex v2 = transMatrix.transform(t.v2);
                     v2.x += getWidth() / 2.0;
                     v2.y += getHeight() / 2.0;
 
+                    Vertex v3 = transMatrix.transform(t.v3);
                     v3.x += getWidth() / 2.0;
                     v3.y += getHeight() / 2.0;
+
+                    Vertex ab = new Vertex(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
+                    Vertex ac = new Vertex(v3.x - v1.x, v3.y - v1.y, v3.z - v1.z);
+                    Vertex norm = new Vertex(
+                            ab.y * ac.z - ab.z * ac.y,
+                            ab.z * ac.x - ab.x * ac.z,
+                            ab.x * ac.y - ab.y * ac.x
+                    );
+                    double normalLength = Math.sqrt(norm.x * norm.x + norm.y * norm.y + norm.z * norm.z);
+                    norm.x /= normalLength;
+                    norm.y /= normalLength;
+                    norm.z /= normalLength;
+
+                    double angleCos = Math.abs(norm.z);
 
                     // calculate rectangular bounds for triangle
                     int minX = (int) Math.max(0, Math.ceil(Math.min(v1.x, Math.min(v2.x, v3.x))));
@@ -118,7 +127,7 @@ public class Viewer {
                                 double depth = (b1 * v1.z) + (b2 * v2.z) + (b3 * v3.z);
                                 int zIndex = y * img.getWidth() + x;
                                 if (zBuffer[zIndex] < depth) {
-                                    img.setRGB(x, y, t.color.getRGB());
+                                    img.setRGB(x, y, ShadeCalc.getShade(t.color, angleCos).getRGB());
                                     zBuffer[zIndex] = depth;
                                 }
                             }
