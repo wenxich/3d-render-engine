@@ -209,7 +209,7 @@ public class Viewer {
         blueSlider.addChangeListener(e -> render.repaint());
         inflateSlider.addChangeListener(e -> render.repaint());
 
-        frame.setSize(800,800); //width and height = both 500 px
+        frame.setSize(800,800); //width and height = both 800 px
         frame.setLocationRelativeTo(null); //make frame centered
         frame.setVisible(true); //make frame visible
     }
