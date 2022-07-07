@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +24,6 @@ public class Viewer {
         verticalRotation.setBackground(Color.BLACK);
         pane.add(verticalRotation, BorderLayout.EAST);
 
-
         //create sliders for color adjustment
         JSlider redSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
         JSlider greenSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
@@ -43,18 +43,32 @@ public class Viewer {
         greenLabel.setHorizontalAlignment(SwingConstants.CENTER);
         blueLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        JPanel colorPanel = new JPanel();
-        colorPanel.setLayout(new GridLayout(2,3,1,1));
-        colorPanel.setBackground(Color.BLACK);
+        //add inflate feature
+        JLabel inflateLabel = new JLabel("SLIDE TO INFLATE: ");
+        inflateLabel.setForeground(Color.WHITE);
+        inflateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        JSlider inflateSlider = new JSlider(JSlider.HORIZONTAL, 0, 6, 0);
+        JPanel inflatePanel = new JPanel(new GridLayout(1, 2, 1, 1));
+        inflatePanel.setBackground(Color.BLACK);
+        inflatePanel.add(inflateLabel);
+        inflatePanel.add(inflateSlider);
 
-        colorPanel.add(redSlider); //row 1 col 1
-        colorPanel.add(greenSlider); //row 1 col 2
-        colorPanel.add(blueSlider); //row 1 col 3
-        colorPanel.add(redLabel); //row 2 col 1
-        colorPanel.add(greenLabel); //row 2 col 2
-        colorPanel.add(blueLabel); //row 2 col 3
+        JLabel spacer = new JLabel(" "); //UI element
 
-        pane.add(colorPanel, BorderLayout.NORTH);
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new GridLayout(3,3,1,1));
+        topPanel.setBackground(Color.BLACK);
+
+        topPanel.add(redSlider); //row 1 col 1
+        topPanel.add(greenSlider); //row 1 col 2
+        topPanel.add(blueSlider); //row 1 col 3
+        topPanel.add(redLabel); //row 2 col 1
+        topPanel.add(greenLabel); //row 2 col 2
+        topPanel.add(blueLabel); //row 2 col 3
+        topPanel.add(spacer); //row 3 col 1
+        topPanel.add(inflatePanel); //row 3 col 2
+
+        pane.add(topPanel, BorderLayout.NORTH);
 
         //create render panel
         JPanel render = new JPanel() {
@@ -94,6 +108,10 @@ public class Viewer {
                         new Vertex (200, -200, -200),
                         new Vertex(200, 200, 200),
                         tetrahedronColor));
+
+                for (int i = 0; i < inflateSlider.getValue(); i++) {
+                    tetrahedron = inflate(tetrahedron);
+                }
 
                 double horizontalSliderPosition = Math.toRadians(horizontalRotation.getValue());
                 MatrixCalc horizontalTransMatrix = new MatrixCalc(new double[] {
@@ -189,9 +207,34 @@ public class Viewer {
         redSlider.addChangeListener(e -> render.repaint());
         greenSlider.addChangeListener(e -> render.repaint());
         blueSlider.addChangeListener(e -> render.repaint());
+        inflateSlider.addChangeListener(e -> render.repaint());
 
         frame.setSize(800,800); //width and height = both 500 px
         frame.setLocationRelativeTo(null); //make frame centered
         frame.setVisible(true); //make frame visible
+    }
+
+    //method to approximate other 3D objects by subdividing triangles into 4 parts and "inflating"
+    //directed by a JSlider
+    public static List<Triangle> inflate(List<Triangle> tris) {
+        List<Triangle> approx = new ArrayList<>();
+        for (Triangle t : tris) {
+            Vertex m1 = new Vertex((t.v1.x + t.v2.x)/2, (t.v1.y + t.v2.y)/2, (t.v1.z + t.v2.z)/2);
+            Vertex m2 = new Vertex((t.v2.x + t.v3.x)/2, (t.v2.y + t.v3.y)/2, (t.v2.z + t.v3.z)/2);
+            Vertex m3 = new Vertex((t.v1.x + t.v3.x)/2, (t.v1.y + t.v3.y)/2, (t.v1.z + t.v3.z)/2);
+            approx.add(new Triangle(t.v1, m1, m3, t.color));
+            approx.add(new Triangle(t.v2, m1, m2, t.color));
+            approx.add(new Triangle(t.v3, m2, m3, t.color));
+            approx.add(new Triangle(m1, m2, m3, t.color));
+        }
+        for (Triangle t : approx) {
+            for (Vertex v : new Vertex[] { t.v1, t.v2, t.v3 }) {
+                double l = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z) / Math.sqrt(30000);
+                v.x /= l;
+                v.y /= l;
+                v.z /= l;
+            }
+        }
+        return approx;
     }
 }
